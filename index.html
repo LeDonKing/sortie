@@ -163,6 +163,15 @@
   </section>
 
   <!-- Écran 4 : confirmation -->
+  <section class="screen" id="s2c">
+    <div class="big-emoji">💬</div>
+    <h1>Un <span class="hl">commentaire</span> à ajouter ?</h1>
+    <p class="sub">Une précision, une condition, une dinguerie… vas-y</p>
+    <textarea id="comment" maxlength="500" placeholder="Écris ce que tu veux (ou rien du tout)"></textarea>
+    <button class="yes go" id="final">Non ce sera tout</button>
+    <button class="ghost" id="back2">← Retour</button>
+  </section>
+
   <section class="screen" id="s3">
     <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
       <circle cx="60" cy="64" r="40" fill="#ffd23f" stroke="#151515" stroke-width="3.5"/>
@@ -395,7 +404,7 @@
       plan = txt ? " pour manger chez "+txt : " pour un resto"+(type?" "+type:"");
     } else if(quoi==="Un verre"){
       detail = txt || "On trouvera un endroit";
-      plan = " pour boire un verre"+(txt?" au "+txt:"");
+      plan = " pour boire un verre"+(txt?" ("+txt+")":"");
     } else if(quoi==="Un ciné"){
       detail = txt ? "« "+txt+" »" : "On choisira le film ensemble";
       plan = txt ? " pour aller voir « "+txt+" » au ciné" : " pour un ciné";
@@ -419,9 +428,23 @@
       +"&text="+encodeURIComponent(calTitle)
       +"&dates="+fmt(start)+"/"+fmt(end)
       +"&ctz=Europe/Paris"
-      +"&details="+encodeURIComponent(calDetails)
-      +(where?"&location="+encodeURIComponent(where):"");
+      +(where?"&location="+encodeURIComponent(where):"")
+      +"&details="+encodeURIComponent(calDetails); // details en dernier : le commentaire s'y ajoute
     if(guest) summary=guest+" a répondu : "+summary;
+    baseSummary=summary; baseRecap=$("recap").innerHTML; baseCal=$("gcal").href;
+    show("s2c"); window.scrollTo(0,0); updateFinal();
+  });
+
+  // Étape commentaire → confirmation + envoi
+  var baseSummary="", baseRecap="", baseCal="";
+  function updateFinal(){ $("final").textContent = $("comment").value.trim() ? "Envoyer 🚀" : "Non ce sera tout"; }
+  $("comment").addEventListener("input",updateFinal);
+  $("back2").addEventListener("click",function(){ show("s2b"); });
+  $("final").addEventListener("click",function(){
+    var c=$("comment").value.trim();
+    summary=baseSummary+(c?"\n\n💬 Commentaire : "+c:"");
+    $("recap").innerHTML=baseRecap+(c?"<br>💬 <b>"+esc(c)+"</b>":"");
+    $("gcal").href=baseCal+(c?encodeURIComponent("\n\nCommentaire : "+c):"");
     confetti(); show("s3"); window.scrollTo(0,0);
     sendAnswer();
   });
@@ -430,6 +453,7 @@
     tries=0;yesScale=1;yes.style.transform="";
     no.className="no";no.removeAttribute("style");no.textContent="Non";
     taunt.textContent="Réfléchis bien… (mais pas trop)";
+    $("comment").value="";
     show("s1");
   });
 })();
