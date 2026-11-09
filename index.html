@@ -444,7 +444,6 @@
     var c=$("comment").value.trim();
     summary=baseSummary+(c?"\n\n💬 Commentaire : "+c:"");
     $("recap").innerHTML=baseRecap+(c?"<br>💬 <b>"+esc(c)+"</b>":"");
-    $("gcal").href=baseCal+(c?encodeURIComponent("\n\nCommentaire : "+c):"");
     confetti(); show("s3"); window.scrollTo(0,0);
     sendAnswer();
   });
