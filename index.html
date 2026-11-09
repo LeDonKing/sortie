@@ -92,6 +92,7 @@
   .status{font-weight:700;font-size:15px;padding:10px 14px;border:var(--line);border-radius:12px;background:#fff;box-shadow:3px 3px 0 var(--ink);display:inline-block}
   .status.ok{background:var(--teal)}
   .status.ko{background:#ffd6c9}
+  .cal-btn{display:block;box-sizing:border-box;text-decoration:none;background:#fff;margin-top:18px}
   .foot{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:var(--soft)}
 
   .confetti{position:fixed;width:11px;height:15px;top:-20px;z-index:20;pointer-events:none;border:2px solid var(--ink);animation:conf 2.4s ease-in forwards}
@@ -178,6 +179,7 @@
     <div class="recap" id="recap"></div>
     <div class="status" id="status">Envoi de ta réponse…</div>
     <button class="yes go" id="retry" style="display:none">Réessayer l'envoi</button>
+    <a class="yes go cal-btn" id="gcal" href="#" target="_blank" rel="noopener">📅 Ajouter à Google Agenda</a>
     <button class="ghost" id="again">↺ Recommencer</button>
   </section>
 </div>
@@ -407,6 +409,19 @@
     }
     $("recap").innerHTML="📅 <b>"+jour+"</b><br>⏰ <b>"+h+"</b><br>✨ <b>"+esc(activity)+"</b><br>👉 <b>"+esc(detail)+"</b>";
     summary="C'est oui 🤙 On se voit "+jour+" à "+h+plan+" !";
+    // Lien Google Agenda : 2h par défaut
+    var calTitle = quoi==="Autre" ? "Rdv avec le meilleur" : quoi.replace(/^(Un|Une)\s+/,"").replace(/^./,function(c){return c.toUpperCase()})+" avec le meilleur";
+    var hm=h.split("h"), start=new Date(picked.getFullYear(),picked.getMonth(),picked.getDate(),+hm[0],+hm[1]);
+    var end=new Date(start.getTime()+2*3600*1000);
+    function fmt(d){function z(n){return String(n).padStart(2,"0")} return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"T"+z(d.getHours())+z(d.getMinutes())+"00";}
+    var where = (quoi==="Un resto"||quoi==="Un verre"||quoi==="Une balade") ? txt : "";
+    var calDetails = quoi==="Autre" ? "Le programme : "+txt : ("Au programme : "+activity.replace(/^\S+\s/,"")+(detail?" – "+detail:""));
+    $("gcal").href="https://calendar.google.com/calendar/render?action=TEMPLATE"
+      +"&text="+encodeURIComponent(calTitle)
+      +"&dates="+fmt(start)+"/"+fmt(end)
+      +"&ctz=Europe/Paris"
+      +"&details="+encodeURIComponent(calDetails)
+      +(where?"&location="+encodeURIComponent(where):"");
     if(guest) summary=guest+" a répondu : "+summary;
     confetti(); show("s3"); window.scrollTo(0,0);
     sendAnswer();
