@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Une petite question…</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fff3dc; --card:#ffffff; --ink:#151515; --soft:#5d5a55;
+    --sun:#ffd23f; --orange:#ff7a3d; --teal:#2ec4b6; --blue:#4d7cfe;
+    --line:3px solid var(--ink); --shadow:5px 5px 0 var(--ink);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"DM Sans",system-ui,sans-serif;color:var(--ink);
+    background-color:var(--bg);
+    background-image:radial-gradient(rgba(21,21,21,.13) 1.2px,transparent 1.2px);
+    background-size:22px 22px;
+    min-height:100vh;display:flex;
+    overflow-x:hidden;padding:24px 20px 48px;
+  }
+  .sticker{position:fixed;pointer-events:none;font-size:30px;opacity:.9;animation:float 7s ease-in-out infinite;z-index:0}
+  @keyframes float{50%{transform:translateY(-14px) rotate(var(--r,8deg))}}
+
+  .card{
+    position:relative;z-index:1;width:min(440px,100%);margin:auto;background:var(--card);
+    border:var(--line);border-radius:24px;box-shadow:8px 8px 0 var(--ink);
+    padding:30px 26px 26px;text-align:center;
+  }
+  .tag{position:absolute;top:-16px;left:50%;transform:translateX(-50%) rotate(-3deg);
+       background:var(--teal);border:var(--line);border-radius:999px;padding:4px 14px;
+       font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .screen{display:none;animation:pop .4s cubic-bezier(.2,1.5,.4,1)}
+  .screen.on{display:block}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+
+  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,6.4vw,32px);line-height:1.1;margin:14px 0 8px;letter-spacing:-.01em}
+  h1 .hl{background:var(--sun);padding:0 6px;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .sub{color:var(--soft);margin:0 0 22px;font-size:15px;min-height:1.3em}
+
+  .mascot{width:118px;height:118px;margin:4px auto 0;display:block;animation:bob 2.4s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-5px) rotate(3deg)}}
+
+  .btns{display:flex;gap:14px;justify-content:center;align-items:center;min-height:66px}
+  button{font:inherit;font-weight:700;cursor:pointer;color:var(--ink);transition:transform .12s,box-shadow .12s,background .15s}
+  .yes,.no,.chip,.go,.d.sel{border:var(--line)}
+  .yes{background:var(--sun);padding:13px 32px;font-size:18px;border-radius:14px;box-shadow:var(--shadow);
+       font-family:"Bricolage Grotesque",sans-serif;font-weight:800}
+  .yes:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink)}
+  .yes:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+  .no{background:#fff;padding:11px 24px;font-size:15px;border-radius:14px;box-shadow:3px 3px 0 var(--ink);
+      transition:left .25s cubic-bezier(.3,1.5,.5,1),top .25s cubic-bezier(.3,1.5,.5,1),transform .2s;}
+  .no.fleeing{position:fixed;z-index:10}
+
+  label{display:block;text-align:left;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px;margin:18px 0 8px}
+  input,select,textarea{
+    width:100%;font:inherit;color:var(--ink);padding:12px 14px;border-radius:12px;
+    border:var(--line);background:#fff;outline:none;box-shadow:3px 3px 0 var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{background:#fffbea}
+  textarea{resize:vertical;min-height:90px}
+  .cal{background:#fff;border:var(--line);border-radius:16px;padding:12px;box-shadow:3px 3px 0 var(--ink)}
+  .cal-head{display:flex;align-items:center;margin-bottom:8px;
+            font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:18px;text-transform:capitalize}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  #dow div{font-size:12px;font-weight:700;color:var(--soft);padding:4px 0}
+  .d{background:transparent;border:0;font-weight:500;font-size:14px;aspect-ratio:1;border-radius:10px;padding:0}
+  .d:hover:not(:disabled){background:#fff1c2}
+  .d:disabled{opacity:.25;cursor:not-allowed}
+  .d.today{box-shadow:inset 0 0 0 2px var(--ink)}
+  .d.sel{background:var(--orange);font-weight:800;box-shadow:2px 2px 0 var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{background:#fff;padding:8px 14px;font-weight:500;font-size:14px;border-radius:999px;box-shadow:2px 2px 0 var(--ink)}
+  .chip:hover{background:#fff6d6}
+  .chip.sel{background:var(--orange);font-weight:700;transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .big-emoji{display:inline-grid;place-items:center;width:84px;height:84px;font-size:46px;line-height:1;
+             background:var(--sun);border:var(--line);border-radius:50%;box-shadow:var(--shadow);margin-top:4px;
+             animation:bob 2.4s ease-in-out infinite}
+  #extra .chips{justify-content:center}
+  #extra input,#extra textarea{margin-top:16px}
+  .go{margin-top:24px;width:100%;font-size:17px;padding:13px 16px}
+  .err{color:#d6401b;font-weight:700;font-size:13px;min-height:1.2em;margin-top:10px}
+
+  .recap{background:#fffbea;border:var(--line);border-radius:16px;padding:14px 16px;margin:6px 0 18px;text-align:left;line-height:1.8;box-shadow:3px 3px 0 var(--ink)}
+  .recap b{font-weight:700}
+  .ghost{background:transparent;border:0;color:var(--soft);font-weight:500;padding:8px;margin-top:8px;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+  .ghost:hover{color:var(--ink)}
+  .status{font-weight:700;font-size:15px;padding:10px 14px;border:var(--line);border-radius:12px;background:#fff;box-shadow:3px 3px 0 var(--ink);display:inline-block}
+  .status.ok{background:var(--teal)}
+  .status.ko{background:#ffd6c9}
+  .foot{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:var(--soft)}
+
+  .confetti{position:fixed;width:11px;height:15px;top:-20px;z-index:20;pointer-events:none;border:2px solid var(--ink);animation:conf 2.4s ease-in forwards}
+  @keyframes conf{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Écran 1 : la question -->
+  <section class="screen on" id="s1">
+    <div class="tag">Invitation officielle</div>
+    <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+      <!-- perso original : bouille ronde à lunettes de soleil -->
+      <circle cx="58" cy="64" r="40" fill="#ffd23f" stroke="#151515" stroke-width="3.5"/>
+      <path d="M30 56h56" stroke="#151515" stroke-width="3.5" stroke-linecap="round"/>
+      <rect x="31" y="54" width="22" height="15" rx="6" fill="#151515"/>
+      <rect x="63" y="54" width="22" height="15" rx="6" fill="#151515"/>
+      <path d="M36 58l6-2" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M68 58l6-2" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M44 80q14 12 28 0" stroke="#151515" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <text x="88" y="40" font-size="26">✌️</text>
+    </svg>
+    <h1 id="question">On se fait une <span class="hl">sortie</span> ?</h1>
+    <p class="sub" id="taunt">Réfléchis bien… (mais pas trop)</p>
+    <div class="btns" id="btns">
+      <button class="yes" id="yes">OUI !</button>
+      <button class="no" id="no">Non</button>
+    </div>
+  </section>
+
+  <!-- Écran 2 : la date -->
+  <section class="screen" id="s2">
+    <h1>Trop bien 🙌<br>Alors… t'es <span class="hl">dispo quand</span> ?</h1>
+    <p class="sub">Promis je m'adapte</p>
+    <form id="form" novalidate>
+      <label>Le jour 📅</label>
+      <div class="cal" id="cal">
+        <div class="cal-head">
+          <span id="month" style="flex:1;text-align:center"></span>
+        </div>
+        <div class="cal-grid" id="dow"></div>
+        <div class="cal-grid" id="days"></div>
+      </div>
+      <label for="time">L'heure ⏰</label>
+      <select id="time"><option value="">Choisis une heure…</option></select>
+      <label>On fait quoi ? 🤔</label>
+      <div class="chips" id="chips">
+        <button type="button" class="chip">🍝 Un resto</button>
+        <button type="button" class="chip">🎬 Un ciné</button>
+        <button type="button" class="chip">🌳 Une balade</button>
+        <button type="button" class="chip">🍹 Un verre</button>
+        <button type="button" class="chip">💭 Autre</button>
+      </div>
+      <div class="err" id="err"></div>
+      <button class="yes go" type="submit">Suivant →</button>
+    </form>
+  </section>
+
+  <!-- Écran 3 : les détails selon l'activité -->
+  <section class="screen" id="s2b">
+    <div class="big-emoji" id="xemoji"></div>
+    <h1 id="xtitle"></h1>
+    <p class="sub" id="xsub"></p>
+    <div id="extra"></div>
+    <div class="err" id="err2"></div>
+    <button class="yes go" id="done">C'est noté !</button>
+    <button class="ghost" id="back">← Retour</button>
+  </section>
+
+  <!-- Écran 4 : confirmation -->
+  <section class="screen" id="s3">
+    <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="64" r="40" fill="#ffd23f" stroke="#151515" stroke-width="3.5"/>
+      <path d="M32 34h56" stroke="#151515" stroke-width="3.5" stroke-linecap="round"/>
+      <rect x="33" y="27" width="22" height="13" rx="6" fill="#151515"/>
+      <rect x="65" y="27" width="22" height="13" rx="6" fill="#151515"/>
+      <path d="M40 62q6-6 12 0M68 62q6-6 12 0" stroke="#151515" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M42 74q18 22 36 0z" fill="#151515"/>
+      <path d="M50 80q10 6 20 0" stroke="#ff7a3d" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <text x="0" y="40" font-size="22">🙌</text>
+    </svg>
+    <h1>C'est <span class="hl">calé</span> !</h1>
+    <div class="recap" id="recap"></div>
+    <div class="status" id="status">Envoi de ta réponse…</div>
+    <button class="yes go" id="retry" style="display:none">Réessayer l'envoi</button>
+    <button class="ghost" id="again">↺ Recommencer</button>
+  </section>
+</div>
+
+<div class="foot">fait avec beaucoup trop de temps libre ✌️</div>
+
+<script>
+(function(){
+  // Prénom optionnel via l'adresse : …#Lea
+  try{
+    var n = decodeURIComponent((location.hash||"").slice(1)).replace(/[-_]/g," ").trim();
+    if(n && n.length < 30){
+      document.getElementById("question").innerHTML = n.replace(/[&<>"]/g,"") + ", on se fait une <span class=\"hl\">sortie</span> ?";
+      document.title = n + ", une petite question…";
+    }
+  }catch(e){}
+
+  // Stickers en fond
+  [["🍕","6%","12%"],["🎬","88%","10%"],["⭐","4%","78%"],["🤙","90%","72%"],["🍿","12%","46%"],["🎳","86%","42%"]]
+  .forEach(function(s,i){
+    var el=document.createElement("div");el.className="sticker";el.textContent=s[0];
+    el.style.left=s[1];el.style.top=s[2];
+    el.style.animationDelay=(-i*1.3)+"s";el.style.setProperty("--r",(i%2?-10:10)+"deg");
+    document.body.appendChild(el);
+  });
+
+  var $=function(id){return document.getElementById(id)};
+  var yes=$("yes"), no=$("no"), taunt=$("taunt");
+  var tries=0, yesScale=1;
+  var taunts=[
+    "Hmm, t'as glissé je crois 🤔","Ce bouton est en panne, désolé","Essaie l'autre, il est plus joli",
+    "Le service informatique a bloqué cette option","Erreur 404 : « non » introuvable",
+    "T'es sûre sûre ?","Même le bouton veut pas","Allez fais pas genre 🙄","Je vais bouder 😤","Bon, il reste qu'une option là"
+  ];
+  var labels=["Non","Sûre ?","Vraiment ?","Nan","Raté 😜","Toujours pas","…","🙈"];
+
+  function flee(e){
+    if(e){e.preventDefault();}
+    var r=no.getBoundingClientRect();
+    if(!no.classList.contains("fleeing")){
+      no.style.left=r.left+"px";no.style.top=r.top+"px";
+      no.classList.add("fleeing");
+      void no.offsetWidth;
+    }
+    var pad=16, w=r.width, h=r.height;
+    var maxX=window.innerWidth-w-pad, maxY=window.innerHeight-h-pad;
+    var cx=r.left, cy=r.top, x, y, guard=0;
+    do{
+      x=pad+Math.random()*(maxX-pad);
+      y=pad+Math.random()*(maxY-pad);
+      guard++;
+    }while(Math.hypot(x-cx,y-cy)<180 && guard<30);
+    no.style.left=x+"px"; no.style.top=y+"px";
+    tries++;
+    taunt.textContent=taunts[(tries-1)%taunts.length];
+    no.textContent=labels[Math.min(tries,labels.length-1)];
+    yesScale=Math.min(yesScale+0.12,2.2);
+    yes.style.transform="scale("+yesScale+")";
+    if(tries>=8){ no.style.transform="scale("+Math.max(.4,1-(tries-7)*.1)+")"; }
+  }
+  no.addEventListener("mouseenter",flee);
+  no.addEventListener("pointerdown",flee);
+  no.addEventListener("touchstart",flee,{passive:false});
+  no.addEventListener("click",flee);
+  no.addEventListener("focus",function(){no.blur();flee();});
+
+  function show(id){
+    document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("on")});
+    $(id).classList.add("on");
+  }
+  function confetti(){
+    var cols=["#ffd23f","#ff7a3d","#2ec4b6","#4d7cfe","#ffffff"];
+    for(var i=0;i<70;i++){
+      var c=document.createElement("div");c.className="confetti";
+      c.style.left=Math.random()*100+"vw";
+      c.style.background=cols[i%cols.length];
+      c.style.animationDelay=Math.random()*.6+"s";
+      c.style.borderRadius=Math.random()>.5?"50%":"2px";
+      document.body.appendChild(c);
+      setTimeout(function(el){return function(){el.remove()}}(c),3200);
+    }
+  }
+
+  yes.addEventListener("click",function(){
+    no.style.display="none"; confetti(); show("s2");
+  });
+
+  // Calendrier
+  var today=new Date(); today.setHours(0,0,0,0);
+  var viewY=2026, viewM=10, picked=null; // bloqué sur novembre 2026
+  ["L","M","M","J","V","S","D"].forEach(function(l){var d=document.createElement("div");d.textContent=l;$("dow").appendChild(d);});
+  function renderCal(){
+    var first=new Date(viewY,viewM,1);
+    $("month").textContent=first.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    var grid=$("days"); grid.innerHTML="";
+    var offset=(first.getDay()+6)%7, n=new Date(viewY,viewM+1,0).getDate();
+    for(var i=0;i<offset;i++) grid.appendChild(document.createElement("div"));
+    for(var d=1;d<=n;d++){
+      var b=document.createElement("button"); b.type="button"; b.className="d"; b.textContent=d;
+      var dt=new Date(viewY,viewM,d);
+      if(dt<today) b.disabled=true;
+      if(dt.getTime()===today.getTime()) b.classList.add("today");
+      if(picked&&dt.getTime()===picked.getTime()) b.classList.add("sel");
+      b.dataset.d=d; grid.appendChild(b);
+    }
+  }
+  $("days").addEventListener("click",function(e){
+    var b=e.target.closest(".d"); if(!b||b.disabled) return;
+    picked=new Date(viewY,viewM,+b.dataset.d); renderCal();
+  });
+  renderCal();
+
+  // Heures de 11h à 22h
+  var sel=$("time");
+  for(var h=11;h<=22;h++){["00","30"].forEach(function(m){
+    var o=document.createElement("option");o.value=h+"h"+m;o.textContent=h+"h"+m;sel.appendChild(o);
+  });}
+
+  // Choix détaillés selon l'activité
+  var EXTRA={
+    "Un resto":{emoji:"🍝", title:"Tu veux manger quoi ?", sub:"Choisis un type de cuisine, ou donne-moi direct un resto",
+      chips:["🍕 Italien","🍣 Japonais","🍔 Burger","🥙 Libanais","🍛 Indien","🌮 Mexicain","💭 Autre"],
+      other:"Quel type de cuisine ?",
+      input:"Ou un nom de resto à proposer ?"},
+    "Un verre":{emoji:"🍹", title:"Un endroit en préférence ?", sub:"Si t'as un bar en tête, dis-le moi",
+      input:"Un lieu à proposer ?"},
+    "Un ciné":{emoji:"🎬", title:"Un film en particulier ?", sub:"(je te préviens c'est VOSTFR si c'est un film étranger)",
+      input:"Le titre du film (facultatif)"},
+    "Une balade":{emoji:"🌳", title:"On se balade où ?", sub:"Un parc, des quais, un quartier…",
+      input:"Un lieu à proposer ?"},
+    "Autre":{emoji:"💭", title:"Dis-moi tout", sub:"T'as une idée ? Je t'écoute",
+      textarea:"Ton idée…"}
+  };
+  var activity="", subChip="";
+  function strip(t){return t.replace(/^\S+\s/,"");}
+  function esc(t){return t.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]});}
+
+  function renderExtra(){
+    var box=$("extra"); subChip="";
+    var cfg=EXTRA[strip(activity)];
+    $("xemoji").textContent=cfg.emoji; $("xtitle").textContent=cfg.title; $("xsub").textContent=cfg.sub;
+    var html="";
+    if(cfg.chips) html+='<div class="chips">'+cfg.chips.map(function(c){return '<button type="button" class="chip">'+c+'</button>'}).join("")+"</div>";
+    if(cfg.other) html+='<input type="text" id="xother" maxlength="60" placeholder="'+cfg.other+'" style="display:none">';
+    if(cfg.input) html+='<input type="text" id="xtext" maxlength="80" placeholder="'+cfg.input+'">';
+    if(cfg.textarea) html+='<textarea id="xtext" maxlength="300" placeholder="'+cfg.textarea+'"></textarea>';
+    box.innerHTML=html; $("err2").textContent="";
+  }
+  $("extra").addEventListener("click",function(e){
+    var b=e.target.closest(".chip"); if(!b) return;
+    var was=b.classList.contains("sel");
+    $("extra").querySelectorAll(".chip").forEach(function(c){c.classList.remove("sel")});
+    if(!was) b.classList.add("sel");
+    subChip=was?"":strip(b.textContent);
+    var o=$("xother");
+    if(o){
+      if(subChip==="Autre"){ o.style.display="block"; o.focus(); }
+      else { o.style.display="none"; o.value=""; }
+    }
+  });
+
+  $("chips").addEventListener("click",function(e){
+    var b=e.target.closest(".chip"); if(!b) return;
+    $("chips").querySelectorAll(".chip").forEach(function(c){c.classList.remove("sel")});
+    b.classList.add("sel"); activity=b.textContent;
+  });
+
+  // Étape 2 → étape 3
+  $("form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var miss="";
+    if(!picked) miss="Choisis un jour 📅";
+    else if(!sel.value) miss="Choisis une heure ⏰";
+    else if(!activity) miss="Choisis ce qu'on fait ✨";
+    if(miss){ $("err").textContent=miss; return; }
+    $("err").textContent="";
+    renderExtra(); show("s2b");
+    window.scrollTo(0,0);
+  });
+  $("back").addEventListener("click",function(){ show("s2"); });
+
+  // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
+  var NTFY_TOPIC="sortie-19034209698e";
+  var guest=""; try{ guest=decodeURIComponent((location.hash||"").slice(1)).replace(/[-_]/g," ").trim(); }catch(e){}
+  var summary="", sent=false;
+  function sendAnswer(){
+    var st=$("status"); st.className="status"; st.textContent="Envoi de ta réponse…"; $("retry").style.display="none";
+    var ctrl=("AbortController" in window)?new AbortController():null;
+    var timer=setTimeout(function(){ if(ctrl) ctrl.abort(); },10000);
+    var title="Réponse à ton invitation"+(guest?" ("+guest+")":"");
+    fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
+      method:"POST", body:summary, signal:ctrl?ctrl.signal:undefined
+    }).then(function(r){
+      clearTimeout(timer);
+      if(!r.ok) throw new Error(r.status);
+      sent=true; st.className="status ok"; st.textContent="Réponse envoyée ✅ À très vite !";
+    }).catch(function(){
+      clearTimeout(timer);
+      st.className="status ko"; st.textContent="Oups, l'envoi a raté 😬"; $("retry").style.display="block";
+    });
+  }
+  $("retry").addEventListener("click",sendAnswer);
+
+  // Étape 3 → confirmation
+  $("done").addEventListener("click",function(){
+    var h=sel.value, quoi=strip(activity);
+    var txt=$("xtext")?$("xtext").value.trim():"";
+    var other=$("xother")?$("xother").value.trim():"";
+    var miss="";
+    if(quoi==="Un resto"&&!subChip&&!txt) miss="Choisis un type de cuisine ou propose un resto 👀";
+    else if(quoi==="Un resto"&&subChip==="Autre"&&!other&&!txt) miss="Précise le type de cuisine 👀";
+    else if(quoi==="Une balade"&&!txt) miss="Il manque le lieu 🗺️";
+    else if(quoi==="Autre"&&!txt) miss="Dis-moi ton idée 💭";
+    if(miss){ $("err2").textContent=miss; return; }
+    $("err2").textContent="";
+
+    var jour=picked.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+    var detail="", plan="";
+    var type=subChip==="Autre" ? other.toLowerCase() : subChip.toLowerCase();
+    if(quoi==="Un resto"){
+      detail = txt ? txt+(type?" ("+type+")":"") : (type?"Resto "+type:"On verra sur place");
+      plan = txt ? " pour manger chez "+txt : " pour un resto"+(type?" "+type:"");
+    } else if(quoi==="Un verre"){
+      detail = txt || "On trouvera un endroit";
+      plan = " pour boire un verre"+(txt?" au "+txt:"");
+    } else if(quoi==="Un ciné"){
+      detail = txt ? "« "+txt+" »" : "On choisira le film ensemble";
+      plan = txt ? " pour aller voir « "+txt+" » au ciné" : " pour un ciné";
+    } else if(quoi==="Une balade"){
+      detail = txt;
+      plan = " pour une balade : "+txt;
+    } else {
+      detail = txt;
+      plan = ". Le programme : "+txt;
+    }
+    $("recap").innerHTML="📅 <b>"+jour+"</b><br>⏰ <b>"+h+"</b><br>✨ <b>"+esc(activity)+"</b><br>👉 <b>"+esc(detail)+"</b>";
+    summary="C'est oui 🤙 On se voit "+jour+" à "+h+plan+" !";
+    if(guest) summary=guest+" a répondu : "+summary;
+    confetti(); show("s3"); window.scrollTo(0,0);
+    sendAnswer();
+  });
+
+  $("again").addEventListener("click",function(){
+    tries=0;yesScale=1;yes.style.transform="";
+    no.className="no";no.removeAttribute("style");no.textContent="Non";
+    taunt.textContent="Réfléchis bien… (mais pas trop)";
+    show("s1");
+  });
+})();
+</script>
+</body>
+</html>
