@@ -369,6 +369,48 @@
   // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
   var NTFY_TOPIC="sortie-19034209698e";
 
+  // Appareil + navigateur (le modèle exact n'est dispo que sur Chrome/Samsung Android)
+  var devicePromise=null;
+  function deviceInfo(){
+    if(devicePromise) return devicePromise;
+    var ua=navigator.userAgent||"";
+    function browser(){
+      if(/SamsungBrowser/.test(ua)) return "Samsung Internet";
+      if(/MiuiBrowser|XiaoMi/.test(ua)) return "Navigateur Xiaomi";
+      if(/EdgA?\//.test(ua)) return "Edge";
+      if(/OPR\/|Opera/.test(ua)) return "Opera";
+      if(/FxiOS|Firefox/.test(ua)) return "Firefox";
+      if(/CriOS|Chrome/.test(ua)) return "Chrome";
+      if(/Instagram/.test(ua)) return "Instagram";
+      if(/Safari/.test(ua)) return "Safari";
+      return "navigateur inconnu";
+    }
+    function guess(){
+      if(/iPhone/.test(ua)) return "iPhone";
+      if(/iPad/.test(ua)) return "iPad";
+      var m=ua.match(/; ([^;)]+?) Build\//) || ua.match(/Android [\d.]+; ([^;)]+)\)/);
+      if(m && m[1]!=="K") return m[1].replace(/ Build.*$/,"");
+      if(/Android/.test(ua)) return "Android (modèle masqué)";
+      if(/Macintosh/.test(ua)) return (navigator.maxTouchPoints>1?"iPad":"Mac");
+      if(/Windows/.test(ua)) return "PC Windows";
+      return "appareil inconnu";
+    }
+    devicePromise=new Promise(function(resolve){
+      var done=function(model){ resolve((model||guess())+" · "+browser()); };
+      try{
+        if(navigator.userAgentData && navigator.userAgentData.getHighEntropyValues){
+          var t=setTimeout(function(){done("")},1500);
+          navigator.userAgentData.getHighEntropyValues(["model"]).then(function(v){
+            clearTimeout(t); done(v && v.model ? v.model : "");
+          },function(){ clearTimeout(t); done(""); });
+          return;
+        }
+      }catch(e){}
+      done("");
+    });
+    return devicePromise;
+  }
+
   // Alerte à l'ouverture (une fois par session). Ouvrir le site avec #moi désactive l'alerte sur cet appareil.
   (function(){
     try{
@@ -377,10 +419,12 @@
       if(sessionStorage.getItem("ouvertureSignalee")==="1") return;
       sessionStorage.setItem("ouvertureSignalee","1");
     }catch(e){}
-    try{
-      fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 Dounia vient d'ouvrir le lien")+"&tags=eyes",
-        {method:"POST",body:"Elle est sur la page d'accueil."}).catch(function(){});
-    }catch(e){}
+    deviceInfo().then(function(dev){
+      try{
+        fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 Dounia vient d'ouvrir le lien")+"&tags=eyes",
+          {method:"POST",body:"📱 "+dev}).catch(function(){});
+      }catch(e){}
+    });
   })();
   var guest="Dounia";
   var summary="", sent=false;
@@ -389,9 +433,9 @@
     var ctrl=("AbortController" in window)?new AbortController():null;
     var timer=setTimeout(function(){ if(ctrl) ctrl.abort(); },10000);
     var title="Réponse à ton invitation"+(guest?" ("+guest+")":"");
-    fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
-      method:"POST", body:summary, signal:ctrl?ctrl.signal:undefined
-    }).then(function(r){
+    deviceInfo().then(function(dev){ return fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
+      method:"POST", body:summary+"\n\n📱 "+dev, signal:ctrl?ctrl.signal:undefined
+    }); }).then(function(r){
       clearTimeout(timer);
       if(!r.ok) throw new Error(r.status);
       sent=true; st.className="status ok"; st.textContent="Réponse envoyée ✅ À très vite !";
