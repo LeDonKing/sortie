@@ -369,6 +369,13 @@
   // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
   function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
   var NTFY_TOPIC=_d("c29ydGllLTE5MDM0MjA5Njk4ZQ==");
+  var SHEET_URL=_d("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3WDYtODFyQVNPYzZSa2UxTEw5bEF6ZnpfV2IyT055M0djOG9zQmhveWprY0k2R3hvV2xqemRUN3k0VjRsNUNDbFMvZXhlYw=="); // backup Google Sheet
+  function logSheet(type,details,dev){
+    try{
+      fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({type:type,guest:(typeof guest!=="undefined"?guest:""),details:details||"",device:dev||""})}).catch(function(){});
+    }catch(e){}
+  }
 
   // Appareil + navigateur (le modèle exact n'est dispo que sur Chrome/Samsung Android)
   var devicePromise=null;
@@ -425,6 +432,7 @@
         fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(_d("8J+RgCBEb3VuaWEgdmllbnQgZCdvdXZyaXIgbGUgbGllbg=="))+"&tags=eyes",
           {method:"POST",body:"📱 "+dev}).catch(function(){});
       }catch(e){}
+      logSheet("ouverture","Page d'accueil",dev);
     });
   })();
   var guest=_d("RG91bmlh");
@@ -434,7 +442,7 @@
     var ctrl=("AbortController" in window)?new AbortController():null;
     var timer=setTimeout(function(){ if(ctrl) ctrl.abort(); },10000);
     var title=_d("UsOpcG9uc2Ugw6AgdG9uIGludml0YXRpb24=")+(guest?" ("+guest+")":"");
-    deviceInfo().then(function(dev){ return fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
+    deviceInfo().then(function(dev){ logSheet("réponse",summary,dev); return fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
       method:"POST", body:summary+"\n\n📱 "+dev, signal:ctrl?ctrl.signal:undefined
     }); }).then(function(r){
       clearTimeout(timer);
