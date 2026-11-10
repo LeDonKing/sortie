@@ -219,7 +219,13 @@
     el.innerHTML=h; box.appendChild(el);
   });
   box.addEventListener("click",function(e){
-    if(e.target.closest(".site")){ return; } // laisser le lien s'ouvrir
+    var _sl=e.target.closest(".site");
+    if(_sl){
+      var _c=_sl.closest(".opt"), _n=_c?_c.dataset.nom:"";
+      var _loc=/Lille/.test(_sl.textContent)?" (Lille)":(/Saint-André/.test(_sl.textContent)?" (Saint-André)":"");
+      logStep("clic site",{detail:_n+_loc});
+      return; // laisser le lien s'ouvrir
+    }
     var sc=e.target.closest(".subchip");
     if(sc){ e.stopPropagation();
       sc.parentNode.querySelectorAll(".subchip").forEach(function(c){c.classList.remove("sel")});
