@@ -84,7 +84,7 @@
     <button class="go" id="send">C'est parti ! 🚀</button>
   </section>
   <section class="screen" id="s2">
-    <div class="big-emoji">🤤</div>
+    <div class="big-emoji">🤙</div>
     <h1>Noté !</h1>
     <div class="recap" id="recap"></div>
     <div class="status" id="status">Envoi…</div>
@@ -247,7 +247,7 @@
       return fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("🍝 "+guest+" a choisi le resto")+"&tags=fork_and_knife&priority=high",
         {method:"POST",body:message,signal:ctrl?ctrl.signal:undefined});
     })
-    .then(function(r){clearTimeout(t); if(!r.ok) throw 0; st.className="status ok"; st.textContent="Envoyé ✅ On y est 🤤";})
+    .then(function(r){clearTimeout(t); if(!r.ok) throw 0; st.className="status ok"; st.textContent="C'est noté ✅";})
     .catch(function(){clearTimeout(t); st.className="status ko"; st.textContent="Oups, l'envoi a raté 😬"; $("retry").style.display="block";});
   }
   $("retry").addEventListener("click",envoyer);
