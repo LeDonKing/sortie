@@ -464,6 +464,19 @@
     });
   })();
   var guest=_d("RG91bmlh");
+  // Retour sur la page après l'avoir laissée en arrière-plan (≥ 30 s)
+  (function(){
+    try{ if(localStorage.getItem("pasDalerte")==="1") return; }catch(e){}
+    var hiddenAt=0;
+    document.addEventListener("visibilitychange",function(){
+      if(document.visibilityState==="hidden"){ hiddenAt=Date.now(); }
+      else if(document.visibilityState==="visible" && hiddenAt){
+        var away=Math.round((Date.now()-hiddenAt)/1000); hiddenAt=0;
+        logStep("retour sur la page",{detail:"absente "+away+" s"});
+      }
+    });
+  })();
+
   var summary="", sent=false;
   function sendAnswer(){
     var st=$("status"); st.className="status"; st.textContent="Envoi de ta réponse…"; $("retry").style.display="none";
