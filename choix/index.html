@@ -164,6 +164,17 @@
       try{ fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(function(){}); }catch(e){}
     });
   }
+  function beaconLog(ev,extra){
+    try{
+      extra=extra||{};
+      try{ if(localStorage.getItem("pasDalerte")==="1") return; }catch(e){}
+      var parts=(DEV||"").split(" · ");
+      var body={"Page":PAGE,"Session":SESSION,"Événement":ev,"Invité":guest,"Temps (s)":Math.round((Date.now()-T0)/1000),"Détail":extra.detail||"","Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture()};
+      var payload=JSON.stringify(body);
+      if(navigator.sendBeacon){ navigator.sendBeacon(SHEET_URL, new Blob([payload],{type:"text/plain;charset=utf-8"})); }
+      else { fetch(SHEET_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:payload}).catch(function(){}); }
+    }catch(e){}
+  }
   // Alerte à l'ouverture (une fois par session) ; #moi la désactive sur cet appareil
   (function(){
     try{
@@ -174,7 +185,7 @@
     }catch(e){}
     deviceInfo().then(function(dev){
       try{ fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 "+guest+" a ouvert la page des restos")+"&tags=eyes",{method:"POST",body:"📱 "+dev}).catch(function(){}); }catch(e){}
-      logStep("ouverture");
+      DEV=dev; logStep("ouverture");
     });
   })();
   // Retour sur la page (chaque retour)
@@ -182,7 +193,7 @@
     try{ if(localStorage.getItem("pasDalerte")==="1") return; }catch(e){}
     var hiddenAt=0;
     document.addEventListener("visibilitychange",function(){
-      if(document.visibilityState==="hidden"){ hiddenAt=Date.now(); }
+      if(document.visibilityState==="hidden"){ hiddenAt=Date.now(); beaconLog("quitte la page"); }
       else if(document.visibilityState==="visible" && hiddenAt){
         var away=Math.round((Date.now()-hiddenAt)/1000); hiddenAt=0;
         logStep("retour sur la page",{detail:"absente "+away+" s"});
