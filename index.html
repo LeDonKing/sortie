@@ -115,8 +115,8 @@
       <path d="M44 80q14 12 28 0" stroke="#151515" stroke-width="3.5" fill="none" stroke-linecap="round"/>
       <text x="88" y="40" font-size="26">✌️</text>
     </svg>
-    <h1 id="question">Hey Doudou !<br>On se fait une <span class="hl">sortie</span> ?</h1>
-    <p class="sub" id="taunt">Réfléchis bien… (mais pas trop)</p>
+    <h1 id="question">Hey Doudou !<br>Ça te dit qu'on sorte<br><span class="hl">se changer les idées</span>&nbsp;?</h1>
+    <p class="sub" id="taunt">Juste toi, moi, et zéro prise de tête</p>
     <div class="btns" id="btns">
       <button class="yes" id="yes">OUI !</button>
       <button class="no" id="no">Non</button>
@@ -125,8 +125,8 @@
 
   <!-- Écran 2 : la date -->
   <section class="screen" id="s2">
-    <h1>Trop bien 🙌<br>Alors… t'es <span class="hl">dispo quand</span> ?</h1>
-    <p class="sub">Promis je m'adapte</p>
+    <h1>Trop content 🙌<br>Alors… t'es <span class="hl">dispo quand</span> ?</h1>
+    <p class="sub">Prends le créneau qui t'arrange, je m'adapte</p>
     <form id="form" novalidate>
       <label>Le jour 📅</label>
       <div class="cal" id="cal">
@@ -166,7 +166,7 @@
   <section class="screen" id="s2c">
     <div class="big-emoji">💬</div>
     <h1>Un <span class="hl">commentaire</span> à ajouter ?</h1>
-    <p class="sub">Une précision, une condition, une dinguerie… vas-y</p>
+    <p class="sub">Une envie, une précision, ou juste un truc à me dire… vas-y</p>
     <textarea id="comment" maxlength="500" placeholder="Écris ce que tu veux (ou rien du tout)"></textarea>
     <button class="yes go" id="final">Non ce sera tout</button>
     <button class="ghost" id="back2">← Retour</button>
@@ -183,7 +183,7 @@
       <path d="M50 80q10 6 20 0" stroke="#ff7a3d" stroke-width="4" fill="none" stroke-linecap="round"/>
       <text x="0" y="40" font-size="22">🙌</text>
     </svg>
-    <h1>C'est <span class="hl">calé</span> !</h1>
+    <h1>C'est <span class="hl">calé</span> !<br>Ça va faire du bien 😌</h1>
     <div class="recap" id="recap"></div>
     <div class="status" id="status">Envoi de ta réponse…</div>
     <button class="yes go" id="retry" style="display:none">Réessayer l'envoi</button>
@@ -214,11 +214,12 @@
   var yes=$("yes"), no=$("no"), taunt=$("taunt");
   var tries=0, yesScale=1;
   var taunts=[
-    "Hmm, t'as glissé je crois 🤔","Ce bouton est en panne, désolé","Essaie l'autre, il est plus joli",
-    "Le service informatique a bloqué cette option","Erreur 404 : « non » introuvable",
-    "T'es sûre sûre ?","Même le bouton veut pas","Allez fais pas genre 🙄","Je vais bouder 😤","Bon, il reste qu'une option là"
+    "Hmm, t'as glissé je crois 🤔","Ce bouton est un peu timide 🙈","Essaie l'autre, il est plus joli",
+    "Erreur 404 : « non » introuvable","Allez, ça va te faire du bien","Promis on fait un truc chill",
+    "Pas besoin de te prendre la tête, je gère tout","Toi tu ramènes juste toi, je ramène la bonne humeur",
+    "Allez, une petite sortie 🙏","Bon… il reste qu'une option là 😌"
   ];
-  var labels=["Non","Sûre ?","Vraiment ?","Nan","Raté 😜","Toujours pas","…","🙈"];
+  var labels=["Non","Sûre ?","Vraiment ?","Raté 😜","Presque","…","🙈"];
 
   function flee(e){
     if(e){e.preventDefault();}
@@ -455,7 +456,7 @@
   $("again").addEventListener("click",function(){
     tries=0;yesScale=1;yes.style.transform="";
     no.className="no";no.removeAttribute("style");no.textContent="Non";
-    taunt.textContent="Réfléchis bien… (mais pas trop)";
+    taunt.textContent="Juste toi, moi, et zéro prise de tête";
     $("comment").value="";
     show("s1");
   });
