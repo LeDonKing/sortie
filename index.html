@@ -386,23 +386,9 @@
     try{ if(document.referrer){ return new URL(document.referrer).hostname.replace(/^www\./,""); } }catch(e){}
     return "direct";
   }
-  var BATT="";
-  try{ if(navigator.getBattery){ navigator.getBattery().then(function(b){ BATT=Math.round(b.level*100)+"%"+(b.charging?" ⚡":""); }); } }catch(e){}
   function envInfo(){
     var o={}, c=(navigator.connection||{});
-    try{o["OS"]=navigator.platform||"";}catch(e){}
-    try{o["Langue"]=(navigator.languages&&navigator.languages[0])||navigator.language||"";}catch(e){}
-    try{o["Fuseau"]=Intl.DateTimeFormat().resolvedOptions().timeZone||"";}catch(e){}
-    try{o["Heure locale"]=new Date().toLocaleString("fr-FR");}catch(e){}
-    try{o["Écran"]=screen.width+"×"+screen.height;}catch(e){}
-    try{o["Fenêtre"]=window.innerWidth+"×"+window.innerHeight;}catch(e){}
-    try{o["Ratio px"]=window.devicePixelRatio||"";}catch(e){}
-    try{o["Mémoire (Go)"]=navigator.deviceMemory||"";}catch(e){}
-    try{o["Cœurs CPU"]=navigator.hardwareConcurrency||"";}catch(e){}
     try{o["Connexion"]=(c.effectiveType||"")+(c.downlink?(" ~"+c.downlink+"Mbps"):"");}catch(e){}
-    try{o["Tactile"]=(navigator.maxTouchPoints||0);}catch(e){}
-    try{o["Thème"]=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"sombre":"clair";}catch(e){}
-    try{if(BATT) o["Batterie"]=BATT;}catch(e){}
     return o;
   }
   function logStep(ev,x){
