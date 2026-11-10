@@ -392,7 +392,7 @@
     deviceInfo().then(function(dev){
       var parts=(dev||"").split(" · ");
       var body={
-        "Session":SESSION,"Événement":ev,"Invité":(typeof guest!=="undefined"?guest:""),
+        "Page":"Invitation","Session":SESSION,"Événement":ev,"Invité":(typeof guest!=="undefined"?guest:""),
         "Temps (s)":snap.temps,
         "Jour":snap.jour,"Heure":snap.heure,"Activité":snap.activite,"Détail":snap.detail,
         "Commentaire":snap.commentaire,"Tentatives Non":snap.tentatives,
