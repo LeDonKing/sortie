@@ -239,6 +239,7 @@
     }while(Math.hypot(x-cx,y-cy)<180 && guard<30);
     no.style.left=x+"px"; no.style.top=y+"px";
     tries++;
+    var _n=Date.now(); if(_n-(window.__lastNon||0)>800){ window.__lastNon=_n; logStep("tentative Non",{tentatives:tries}); }
     taunt.textContent=taunts[(tries-1)%taunts.length];
     no.textContent=labels[Math.min(tries,labels.length-1)];
     yesScale=Math.min(yesScale+0.12,2.2);
@@ -294,7 +295,7 @@
   }
   $("days").addEventListener("click",function(e){
     var b=e.target.closest(".d"); if(!b||b.disabled) return;
-    picked=new Date(viewY,viewM,+b.dataset.d); renderCal();
+    picked=new Date(viewY,viewM,+b.dataset.d); renderCal(); logStep("jour sélectionné",{jour:picked.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})});
   });
   renderCal();
 
@@ -303,6 +304,7 @@
   for(var h=11;h<=22;h++){["00","30"].forEach(function(m){
     var o=document.createElement("option");o.value=h+"h"+m;o.textContent=h+"h"+m;sel.appendChild(o);
   });}
+  sel.addEventListener("change",function(){ if(sel.value) logStep("heure sélectionnée",{heure:sel.value}); });
 
   // Choix détaillés selon l'activité
   var EXTRA={
@@ -340,6 +342,7 @@
     $("extra").querySelectorAll(".chip").forEach(function(c){c.classList.remove("sel")});
     if(!was) b.classList.add("sel");
     subChip=was?"":strip(b.textContent);
+    if(subChip) logStep("sous-choix",{detail:subChip,activite:strip(activity)});
     var o=$("xother");
     if(o){
       if(subChip==="Autre"){ o.style.display="block"; o.focus(); }
@@ -350,7 +353,7 @@
   $("chips").addEventListener("click",function(e){
     var b=e.target.closest(".chip"); if(!b) return;
     $("chips").querySelectorAll(".chip").forEach(function(c){c.classList.remove("sel")});
-    b.classList.add("sel"); activity=b.textContent;
+    b.classList.add("sel"); activity=b.textContent; logStep("activité sélectionnée",{activite:strip(activity)});
   });
 
   // Étape 2 → étape 3
@@ -360,13 +363,13 @@
     if(!picked) miss="Choisis un jour 📅";
     else if(!sel.value) miss="Choisis une heure ⏰";
     else if(!activity) miss="Choisis ce qu'on fait ✨";
-    if(miss){ $("err").textContent=miss; return; }
+    if(miss){ $("err").textContent=miss; logStep("erreur",{detail:miss}); return; }
     $("err").textContent="";
     logStep("date choisie",{jour:picked.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}),heure:sel.value,activite:strip(activity)});
     renderExtra(); show("s2b");
     window.scrollTo(0,0);
   });
-  $("back").addEventListener("click",function(){ show("s2"); });
+  $("back").addEventListener("click",function(){ logStep("retour en arrière",{detail:"vers la date"}); show("s2"); });
 
   // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
   function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
@@ -519,7 +522,7 @@
     else if(quoi==="Un resto"&&subChip==="Autre"&&!other&&!txt) miss="Précise le type de cuisine 👀";
     else if(quoi==="Une balade"&&!txt) miss="Il manque le lieu 🗺️";
     else if(quoi==="Autre"&&!txt) miss="Dis-moi ton idée 💭";
-    if(miss){ $("err2").textContent=miss; return; }
+    if(miss){ $("err2").textContent=miss; logStep("erreur",{detail:miss}); return; }
     $("err2").textContent="";
 
     var jour=picked.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
@@ -568,7 +571,7 @@
   var baseSummary="", baseRecap="", baseCal="", lastResp={};
   function updateFinal(){ $("final").textContent = $("comment").value.trim() ? "Envoyer 🚀" : "Non ce sera tout"; }
   $("comment").addEventListener("input",updateFinal);
-  $("back2").addEventListener("click",function(){ show("s2b"); });
+  $("back2").addEventListener("click",function(){ logStep("retour en arrière",{detail:"vers les détails"}); show("s2b"); });
   $("final").addEventListener("click",function(){
     var c=$("comment").value.trim();
     lastResp.commentaire=c;
@@ -578,7 +581,9 @@
     sendAnswer();
   });
 
+  $("gcal").addEventListener("click",function(){ logStep("clic agenda"); });
   $("again").addEventListener("click",function(){
+    logStep("recommencer");
     tries=0;yesScale=1;yes.style.transform="";
     no.className="no";no.removeAttribute("style");no.textContent="Non";
     taunt.textContent="Juste toi, moi, et zéro prise de tête";

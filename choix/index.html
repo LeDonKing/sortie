@@ -240,11 +240,11 @@
     var sc=e.target.closest(".subchip");
     if(sc){ e.stopPropagation();
       sc.parentNode.querySelectorAll(".subchip").forEach(function(c){c.classList.remove("sel")});
-      sc.classList.add("sel"); subloc=sc.dataset.sub; $("err").textContent=""; return; }
+      sc.classList.add("sel"); subloc=sc.dataset.sub; $("err").textContent=""; logStep("sous-choix",{detail:subloc}); return; }
     var o=e.target.closest(".opt"); if(!o) return;
     if(o.dataset.nom!==choix){ subloc=""; o.querySelectorAll(".subchip").forEach(function(c){c.classList.remove("sel")}); }
     box.querySelectorAll(".opt").forEach(function(c){c.classList.remove("sel")});
-    o.classList.add("sel"); choix=o.dataset.nom; $("err").textContent="";
+    o.classList.add("sel"); choix=o.dataset.nom; $("err").textContent=""; logStep("resto sélectionné",{detail:choix});
   });
 
   function show(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("on")});$(id).classList.add("on");window.scrollTo(0,0);}
@@ -271,8 +271,8 @@
 
   var choixFinal="";
   $("send").addEventListener("click",function(){
-    if(!choix){ $("err").textContent="Choisis un resto 👀"; return; }
-    if(choix==="Little Italy" && !subloc){ $("err").textContent="Little Italy : Lille ou Saint-André ?"; return; }
+    if(!choix){ $("err").textContent="Choisis un resto 👀"; logStep("erreur",{detail:"aucun resto"}); return; }
+    if(choix==="Little Italy" && !subloc){ $("err").textContent="Little Italy : Lille ou Saint-André ?"; logStep("erreur",{detail:"Little Italy sans ville"}); return; }
     choixFinal = (choix==="Little Italy") ? "Little Italy ("+subloc+")" : choix;
     var com=$("comment").value.trim();
     $("recap").innerHTML="🍴 <b>"+choixFinal+"</b>"+(com?"<br>💬 "+com.replace(/[&<>]/g,""):"");
