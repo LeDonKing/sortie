@@ -368,6 +368,20 @@
 
   // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
   var NTFY_TOPIC="sortie-19034209698e";
+
+  // Alerte à l'ouverture (une fois par session). Ouvrir le site avec #moi désactive l'alerte sur cet appareil.
+  (function(){
+    try{
+      if(location.hash==="#moi"){ localStorage.setItem("pasDalerte","1"); history.replaceState(null,"",location.pathname); }
+      if(localStorage.getItem("pasDalerte")==="1") return;
+      if(sessionStorage.getItem("ouvertureSignalee")==="1") return;
+      sessionStorage.setItem("ouvertureSignalee","1");
+    }catch(e){}
+    try{
+      fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 Dounia vient d'ouvrir le lien")+"&tags=eyes",
+        {method:"POST",body:"Elle est sur la page d'accueil."}).catch(function(){});
+    }catch(e){}
+  })();
   var guest="Dounia";
   var summary="", sent=false;
   function sendAnswer(){
