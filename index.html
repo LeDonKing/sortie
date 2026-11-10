@@ -367,7 +367,8 @@
   $("back").addEventListener("click",function(){ show("s2"); });
 
   // Envoi de la réponse (notification ntfy sur le téléphone de l'expéditeur)
-  var NTFY_TOPIC="sortie-19034209698e";
+  function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
+  var NTFY_TOPIC=_d("c29ydGllLTE5MDM0MjA5Njk4ZQ==");
 
   // Appareil + navigateur (le modèle exact n'est dispo que sur Chrome/Samsung Android)
   var devicePromise=null;
@@ -421,18 +422,18 @@
     }catch(e){}
     deviceInfo().then(function(dev){
       try{
-        fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 Dounia vient d'ouvrir le lien")+"&tags=eyes",
+        fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(_d("8J+RgCBEb3VuaWEgdmllbnQgZCdvdXZyaXIgbGUgbGllbg=="))+"&tags=eyes",
           {method:"POST",body:"📱 "+dev}).catch(function(){});
       }catch(e){}
     });
   })();
-  var guest="Dounia";
+  var guest=_d("RG91bmlh");
   var summary="", sent=false;
   function sendAnswer(){
     var st=$("status"); st.className="status"; st.textContent="Envoi de ta réponse…"; $("retry").style.display="none";
     var ctrl=("AbortController" in window)?new AbortController():null;
     var timer=setTimeout(function(){ if(ctrl) ctrl.abort(); },10000);
-    var title="Réponse à ton invitation"+(guest?" ("+guest+")":"");
+    var title=_d("UsOpcG9uc2Ugw6AgdG9uIGludml0YXRpb24=")+(guest?" ("+guest+")":"");
     deviceInfo().then(function(dev){ return fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent(title)+"&tags=tada&priority=high",{
       method:"POST", body:summary+"\n\n📱 "+dev, signal:ctrl?ctrl.signal:undefined
     }); }).then(function(r){
@@ -491,7 +492,7 @@
       +"&text="+encodeURIComponent(calTitle)
       +"&dates="+fmt(start)+"/"+fmt(end)
       +"&ctz=Europe/Paris"
-      +"&add="+encodeURIComponent("nathanturpin26@gmail.com")
+      +"&add="+encodeURIComponent(_d("bmF0aGFudHVycGluMjZAZ21haWwuY29t"))
       +(where?"&location="+encodeURIComponent(where):"")
       +"&details="+encodeURIComponent(calDetails); // details en dernier : le commentaire s'y ajoute
     if(guest) summary=guest+" a répondu : "+summary;
