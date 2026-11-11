@@ -388,7 +388,8 @@
   }
   function envInfo(){
     var o={}, c=(navigator.connection||{});
-    try{o["Connexion"]=(c.effectiveType||"")+(c.downlink?(" ~"+c.downlink+"Mbps"):"");}catch(e){}
+    try{ var medium=c.type||"", speed=c.effectiveType||"";
+         o["Connexion"]=(medium?medium:(speed?"≈"+speed:""))+(c.downlink?(" ~"+c.downlink+"Mbps"):""); }catch(e){}
     return o;
   }
   function logStep(ev,x){
