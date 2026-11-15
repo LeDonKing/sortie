@@ -34,7 +34,7 @@
   function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
   var NTFY_TOPIC=_d("c29ydGllLTE5MDM0MjA5Njk4ZQ==");
   var SHEET_URL=_d("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5TzAxc1RuSDNfbXlKODNSQlF1R1phdHBzM0VtcE04TUppWExteUk3ZVBpYjlzMDNBaEFwWFBBZlZNS2NXbHptaEIvZXhlYw==");
-  var guest=_d("RG91bmlh"), SESSION=Math.random().toString(36).slice(2,8), T0=Date.now(), DEV="";
+  var guest=_d("RG91bmlh"), SESSION=Math.random().toString(36).slice(2,8), T0=Date.now(), DEV="", PAGE="Choix resto (masquée)";
 
   var devicePromise=null;
   function deviceInfo(){
@@ -82,7 +82,33 @@
     try{ if(document.referrer){ return new URL(document.referrer).hostname.replace(/^www\./,""); } }catch(e){}
     return "direct";
   }
-  // Log de la tentative d'accès (une fois par session) ; #moi la désactive
+  function connexion(){
+    var c=(navigator.connection||{}), medium=c.type||"", speed=c.effectiveType||"";
+    return (medium?medium:(speed?"≈"+speed:""))+(c.downlink?(" ~"+c.downlink+"Mbps"):"");
+  }
+  function buildBody(ev,extra){
+    extra=extra||{};
+    var parts=(DEV||"").split(" · ");
+    return {"Page":PAGE,"Session":SESSION,"Événement":ev,"Invité":guest,
+      "Temps (s)":Math.round((Date.now()-T0)/1000),"Détail":extra.detail||"",
+      "Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture(),"Connexion":connexion()};
+  }
+  function logStep(ev,extra){
+    deviceInfo().then(function(dev){
+      DEV=dev;
+      try{ fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(buildBody(ev,extra))}).catch(function(){}); }catch(e){}
+    });
+  }
+  function beaconLog(ev,extra){
+    try{
+      if(localStorage.getItem("pasDalerte")==="1") return;
+      var payload=JSON.stringify(buildBody(ev,extra));
+      if(navigator.sendBeacon){ navigator.sendBeacon(SHEET_URL,new Blob([payload],{type:"text/plain;charset=utf-8"})); }
+      else { fetch(SHEET_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:payload}).catch(function(){}); }
+    }catch(e){}
+  }
+
+  // Arrivée sur la page (une fois par session) ; #moi désactive tout sur cet appareil
   (function(){
     try{
       if(location.hash==="#moi"){ localStorage.setItem("pasDalerte","1"); history.replaceState(null,"",location.pathname); }
@@ -92,12 +118,21 @@
     }catch(e){}
     deviceInfo().then(function(dev){
       DEV=dev;
-      var parts=(dev||"").split(" · "), c=(navigator.connection||{}), medium=c.type||"", speed=c.effectiveType||"";
-      var body={"Page":"Choix resto (masquée)","Session":SESSION,"Événement":"tentative d'accès","Invité":guest,
-        "Temps (s)":0,"Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture(),
-        "Connexion":(medium?medium:(speed?"≈"+speed:""))+(c.downlink?(" ~"+c.downlink+"Mbps"):"")};
-      try{ fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(function(){}); }catch(e){}
+      try{ fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(buildBody("tentative d'accès"))}).catch(function(){}); }catch(e){}
       try{ fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 "+guest+" a tenté d'ouvrir la page des restos")+"&tags=eyes&priority=high",{method:"POST",body:"📱 "+dev}).catch(function(){}); }catch(e){}
+    });
+  })();
+
+  // Retour / quitte la page
+  (function(){
+    try{ if(localStorage.getItem("pasDalerte")==="1") return; }catch(e){}
+    var hiddenAt=0;
+    document.addEventListener("visibilitychange",function(){
+      if(document.visibilityState==="hidden"){ hiddenAt=Date.now(); beaconLog("quitte la page"); }
+      else if(document.visibilityState==="visible" && hiddenAt){
+        var away=Math.round((Date.now()-hiddenAt)/1000); hiddenAt=0;
+        logStep("retour sur la page",{detail:"absente "+away+" s"});
+      }
     });
   })();
 
@@ -107,11 +142,7 @@
     e.preventDefault();
     try{
       if(localStorage.getItem("pasDalerte")!=="1"){
-        var parts=(DEV||"").split(" · ");
-        var body={"Page":"Choix resto (masquée)","Session":SESSION,"Événement":"propose un créneau","Invité":guest,
-          "Temps (s)":Math.round((Date.now()-T0)/1000),"Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture()};
-        if(navigator.sendBeacon){ navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(body)],{type:"text/plain;charset=utf-8"})); }
-        else { fetch(SHEET_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(function(){}); }
+        beaconLog("propose un créneau");
         fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("📅 "+guest+" veut proposer un autre créneau")+"&tags=calendar&priority=high",{method:"POST",keepalive:true,body:"📱 "+(DEV||"")}).catch(function(){});
       }
     }catch(e2){}
