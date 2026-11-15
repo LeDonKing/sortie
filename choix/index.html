@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oups…</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fff3dc;--card:#fff;--ink:#151515;--soft:#5d5a55;--sun:#ffd23f;--line:3px solid var(--ink);--shadow:5px 5px 0 var(--ink)}
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{font-family:"DM Sans",system-ui,sans-serif;color:var(--ink);
+    background-color:var(--bg);background-image:radial-gradient(rgba(21,21,21,.13) 1.2px,transparent 1.2px);background-size:22px 22px;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:min(420px,100%);background:var(--card);border:var(--line);border-radius:24px;box-shadow:8px 8px 0 var(--ink);padding:34px 26px;text-align:center}
+  .big{display:inline-grid;place-items:center;width:84px;height:84px;font-size:46px;background:var(--sun);border:var(--line);border-radius:50%;box-shadow:var(--shadow);margin-bottom:10px}
+  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;margin:8px 0 6px}
+  p{color:var(--soft);font-size:15px;margin:0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="big">🙈</div>
+  <h1>Oups, rien par ici</h1>
+  <p>Ce lien n'est plus actif.</p>
+</div>
+<script>
+(function(){
+  function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
+  var NTFY_TOPIC=_d("c29ydGllLTE5MDM0MjA5Njk4ZQ==");
+  var SHEET_URL=_d("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5TzAxc1RuSDNfbXlKODNSQlF1R1phdHBzM0VtcE04TUppWExteUk3ZVBpYjlzMDNBaEFwWFBBZlZNS2NXbHptaEIvZXhlYw==");
+  var guest=_d("RG91bmlh"), SESSION=Math.random().toString(36).slice(2,8), T0=Date.now();
+
+  var devicePromise=null;
+  function deviceInfo(){
+    if(devicePromise) return devicePromise;
+    var ua=navigator.userAgent||"";
+    function browser(){
+      if(/SamsungBrowser/.test(ua)) return "Samsung Internet";
+      if(/MiuiBrowser|XiaoMi/.test(ua)) return "Navigateur Xiaomi";
+      if(/EdgA?\//.test(ua)) return "Edge";
+      if(/OPR\/|Opera/.test(ua)) return "Opera";
+      if(/FxiOS|Firefox/.test(ua)) return "Firefox";
+      if(/CriOS|Chrome/.test(ua)) return "Chrome";
+      if(/Instagram/.test(ua)) return "Instagram";
+      if(/Safari/.test(ua)) return "Safari";
+      return "navigateur inconnu";
+    }
+    function guess(){
+      if(/iPhone/.test(ua)) return "iPhone";
+      if(/iPad/.test(ua)) return "iPad";
+      var m=ua.match(/; ([^;)]+?) Build\//) || ua.match(/Android [\d.]+; ([^;)]+)\)/);
+      if(m && m[1]!=="K") return m[1].replace(/ Build.*$/,"");
+      if(/Android/.test(ua)) return "Android (modèle masqué)";
+      if(/Macintosh/.test(ua)) return (navigator.maxTouchPoints>1?"iPad":"Mac");
+      if(/Windows/.test(ua)) return "PC Windows";
+      return "appareil inconnu";
+    }
+    devicePromise=new Promise(function(resolve){
+      var done=function(model){ resolve((model||guess())+" · "+browser()); };
+      try{
+        if(navigator.userAgentData && navigator.userAgentData.getHighEntropyValues){
+          var t=setTimeout(function(){done("")},1500);
+          navigator.userAgentData.getHighEntropyValues(["model"]).then(function(v){ clearTimeout(t); done(v&&v.model?v.model:""); },function(){ clearTimeout(t); done(""); });
+          return;
+        }
+      }catch(e){}
+      done("");
+    });
+    return devicePromise;
+  }
+  function sourceOuverture(){
+    var ua=navigator.userAgent||"";
+    if(/Instagram/i.test(ua)) return "Instagram";
+    if(/WhatsApp/i.test(ua)) return "WhatsApp";
+    if(/Messenger/i.test(ua)) return "Messenger";
+    try{ if(document.referrer){ return new URL(document.referrer).hostname.replace(/^www\./,""); } }catch(e){}
+    return "direct";
+  }
+  // Log de la tentative d'accès (une fois par session) ; #moi la désactive
+  (function(){
+    try{
+      if(location.hash==="#moi"){ localStorage.setItem("pasDalerte","1"); history.replaceState(null,"",location.pathname); }
+      if(localStorage.getItem("pasDalerte")==="1") return;
+      if(sessionStorage.getItem("acces")==="1") return;
+      sessionStorage.setItem("acces","1");
+    }catch(e){}
+    deviceInfo().then(function(dev){
+      var parts=(dev||"").split(" · "), c=(navigator.connection||{}), medium=c.type||"", speed=c.effectiveType||"";
+      var body={"Page":"Choix resto (masquée)","Session":SESSION,"Événement":"tentative d'accès","Invité":guest,
+        "Temps (s)":0,"Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture(),
+        "Connexion":(medium?medium:(speed?"≈"+speed:""))+(c.downlink?(" ~"+c.downlink+"Mbps"):"")};
+      try{ fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(function(){}); }catch(e){}
+      try{ fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 "+guest+" a tenté d'ouvrir la page des restos")+"&tags=eyes&priority=high",{method:"POST",body:"📱 "+dev}).catch(function(){}); }catch(e){}
+    });
+  })();
+})();
+</script>
+</body>
+</html>
