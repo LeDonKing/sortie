@@ -281,19 +281,21 @@
 
   // Calendrier
   var today=new Date(); today.setHours(0,0,0,0);
-  var viewY=today.getFullYear(), viewM=today.getMonth(), picked=null; // mois glissant
+  var viewY=today.getFullYear(), viewM=today.getMonth(), picked=null; // fenêtre glissante
+  var maxDate=new Date(today); maxDate.setDate(maxDate.getDate()+30);
   ["L","M","M","J","V","S","D"].forEach(function(l){var d=document.createElement("div");d.textContent=l;$("dow").appendChild(d);});
   function renderCal(){
     var first=new Date(viewY,viewM,1);
     $("month").textContent=first.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
     $("prev").disabled=(viewY===today.getFullYear()&&viewM===today.getMonth());
+    $("next").disabled=(viewY>maxDate.getFullYear()||(viewY===maxDate.getFullYear()&&viewM>=maxDate.getMonth()));
     var grid=$("days"); grid.innerHTML="";
     var offset=(first.getDay()+6)%7, n=new Date(viewY,viewM+1,0).getDate();
     for(var i=0;i<offset;i++) grid.appendChild(document.createElement("div"));
     for(var d=1;d<=n;d++){
       var b=document.createElement("button"); b.type="button"; b.className="d"; b.textContent=d;
       var dt=new Date(viewY,viewM,d);
-      if(dt<today) b.disabled=true;
+      if(dt<today || dt>maxDate) b.disabled=true;
       if(dt.getTime()===today.getTime()) b.classList.add("today");
       if(picked&&dt.getTime()===picked.getTime()) b.classList.add("sel");
       b.dataset.d=d; grid.appendChild(b);

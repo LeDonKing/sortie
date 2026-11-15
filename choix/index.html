@@ -17,6 +17,9 @@
   .big{display:inline-grid;place-items:center;width:84px;height:84px;font-size:46px;background:var(--sun);border:var(--line);border-radius:50%;box-shadow:var(--shadow);margin-bottom:10px}
   h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;margin:8px 0 6px}
   p{color:var(--soft);font-size:15px;margin:0}
+  .btn{display:inline-block;margin-top:20px;text-decoration:none;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:16px;color:var(--ink);background:var(--sun);border:var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 20px;cursor:pointer}
+  .btn:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink)}
+  .btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
 </style>
 </head>
 <body>
@@ -24,13 +27,14 @@
   <div class="big">🙈</div>
   <h1>Oups, rien par ici</h1>
   <p>Ce lien n'est plus actif.</p>
+  <a class="btn" id="newslot" href="../">📅 Proposer un autre créneau</a>
 </div>
 <script>
 (function(){
   function _d(x){try{return decodeURIComponent(escape(atob(x)))}catch(e){return ""}}
   var NTFY_TOPIC=_d("c29ydGllLTE5MDM0MjA5Njk4ZQ==");
   var SHEET_URL=_d("aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5TzAxc1RuSDNfbXlKODNSQlF1R1phdHBzM0VtcE04TUppWExteUk3ZVBpYjlzMDNBaEFwWFBBZlZNS2NXbHptaEIvZXhlYw==");
-  var guest=_d("RG91bmlh"), SESSION=Math.random().toString(36).slice(2,8), T0=Date.now();
+  var guest=_d("RG91bmlh"), SESSION=Math.random().toString(36).slice(2,8), T0=Date.now(), DEV="";
 
   var devicePromise=null;
   function deviceInfo(){
@@ -87,6 +91,7 @@
       sessionStorage.setItem("acces","1");
     }catch(e){}
     deviceInfo().then(function(dev){
+      DEV=dev;
       var parts=(dev||"").split(" · "), c=(navigator.connection||{}), medium=c.type||"", speed=c.effectiveType||"";
       var body={"Page":"Choix resto (masquée)","Session":SESSION,"Événement":"tentative d'accès","Invité":guest,
         "Temps (s)":0,"Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture(),
@@ -95,6 +100,23 @@
       try{ fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("👀 "+guest+" a tenté d'ouvrir la page des restos")+"&tags=eyes&priority=high",{method:"POST",body:"📱 "+dev}).catch(function(){}); }catch(e){}
     });
   })();
+
+  // Bouton "proposer un autre créneau" : logge + notifie, puis renvoie à l'invitation
+  var nb=document.getElementById("newslot");
+  if(nb) nb.addEventListener("click",function(e){
+    e.preventDefault();
+    try{
+      if(localStorage.getItem("pasDalerte")!=="1"){
+        var parts=(DEV||"").split(" · ");
+        var body={"Page":"Choix resto (masquée)","Session":SESSION,"Événement":"propose un créneau","Invité":guest,
+          "Temps (s)":Math.round((Date.now()-T0)/1000),"Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture()};
+        if(navigator.sendBeacon){ navigator.sendBeacon(SHEET_URL,new Blob([JSON.stringify(body)],{type:"text/plain;charset=utf-8"})); }
+        else { fetch(SHEET_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).catch(function(){}); }
+        fetch("https://ntfy.sh/"+NTFY_TOPIC+"?title="+encodeURIComponent("📅 "+guest+" veut proposer un autre créneau")+"&tags=calendar&priority=high",{method:"POST",keepalive:true,body:"📱 "+(DEV||"")}).catch(function(){});
+      }
+    }catch(e2){}
+    setTimeout(function(){ location.href="../"; },150);
+  });
 })();
 </script>
 </body>
