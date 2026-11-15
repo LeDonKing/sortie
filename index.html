@@ -64,6 +64,9 @@
   input:focus,select:focus,textarea:focus{background:#fffbea}
   textarea{resize:vertical;min-height:90px}
   .cal{background:#fff;border:var(--line);border-radius:16px;padding:12px;box-shadow:3px 3px 0 var(--ink)}
+  .cal-nav{background:var(--sun);border:var(--line);width:34px;height:34px;font-size:20px;line-height:1;padding:0;border-radius:10px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;font-weight:800}
+  .cal-nav:hover{background:#ffdf6b}
+  .cal-nav:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
   .cal-head{display:flex;align-items:center;margin-bottom:8px;
             font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:18px;text-transform:capitalize}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -131,7 +134,9 @@
       <label>Le jour 📅</label>
       <div class="cal" id="cal">
         <div class="cal-head">
+          <button type="button" class="cal-nav" id="prev" aria-label="Mois précédent">‹</button>
           <span id="month" style="flex:1;text-align:center"></span>
+          <button type="button" class="cal-nav" id="next" aria-label="Mois suivant">›</button>
         </div>
         <div class="cal-grid" id="dow"></div>
         <div class="cal-grid" id="days"></div>
@@ -276,11 +281,12 @@
 
   // Calendrier
   var today=new Date(); today.setHours(0,0,0,0);
-  var viewY=2026, viewM=10, picked=null; // bloqué sur novembre 2026
+  var viewY=today.getFullYear(), viewM=today.getMonth(), picked=null; // mois glissant
   ["L","M","M","J","V","S","D"].forEach(function(l){var d=document.createElement("div");d.textContent=l;$("dow").appendChild(d);});
   function renderCal(){
     var first=new Date(viewY,viewM,1);
     $("month").textContent=first.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    $("prev").disabled=(viewY===today.getFullYear()&&viewM===today.getMonth());
     var grid=$("days"); grid.innerHTML="";
     var offset=(first.getDay()+6)%7, n=new Date(viewY,viewM+1,0).getDate();
     for(var i=0;i<offset;i++) grid.appendChild(document.createElement("div"));
@@ -298,6 +304,8 @@
     picked=new Date(viewY,viewM,+b.dataset.d); renderCal(); logStep("jour sélectionné",{jour:picked.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})});
   });
   renderCal();
+  $("prev").addEventListener("click",function(){ if(--viewM<0){viewM=11;viewY--;} renderCal(); });
+  $("next").addEventListener("click",function(){ if(++viewM>11){viewM=0;viewY++;} renderCal(); });
 
   // Heures de 11h à 22h
   var sel=$("time");
