@@ -89,9 +89,11 @@
   function buildBody(ev,extra){
     extra=extra||{};
     var parts=(DEV||"").split(" · ");
-    return {"Page":PAGE,"Session":SESSION,"Événement":ev,"Invité":guest,
+    var b={"Page":PAGE,"Session":SESSION,"Événement":ev,"Invité":guest,
       "Temps (s)":Math.round((Date.now()-T0)/1000),"Détail":extra.detail||"",
       "Appareil":parts[0]||"","Navigateur":parts[1]||"","Source":sourceOuverture(),"Connexion":connexion()};
+    if(/inconnu/.test(parts[0]||"")||/inconnu/.test(parts[1]||"")) b["UA"]=(navigator.userAgent||"").slice(0,300);
+    return b;
   }
   function logStep(ev,extra){
     deviceInfo().then(function(dev){
